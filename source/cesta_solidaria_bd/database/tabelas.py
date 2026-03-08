@@ -1,6 +1,6 @@
 from pathlib import Path
 from datetime import datetime
-from source.cesta_solidaria_bd.config_database import Config_database
+from config_database import Config_database
 from sqlalchemy import (
     Table, String, Column, MetaData, # para estrutura das tabelas
     Integer, Date, DateTime, Numeric, Text, # para definir formato dos atributos
