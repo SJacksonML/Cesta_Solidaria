@@ -1,10 +1,10 @@
 from pathlib import Path
 from datetime import datetime
-from source.cesta_solidaria_bd.config_database import Config_database
+from config_database import Config_database
 from sqlalchemy import (
     Table, String, Column, MetaData, # para estrutura das tabelas
     Integer, Date, DateTime, Numeric, Text, # para definir formato dos atributos
-    ForeignKey) # para especializar relacionamentos
+    ForeignKey, Boolean) # para especializar relacionamentos
 
 config = Config_database()
 
@@ -23,7 +23,7 @@ class Tabela():
             Column('data_nascimento', Date, nullable=False),
             Column('tel_contato', String, unique=True),
             Column('renda', Numeric(5,2), nullable=False, default=0),
-            Column('estudante', bool, nullable=False),
+            Column('estudante', Boolean, nullable=False),
             Column('data_cadastro', DateTime, nullable=False, default=datetime.now)
         )
 
@@ -127,7 +127,7 @@ class Tabela():
             Column('fornecedor_id', Integer, ForeignKey('fornecedores.id'), nullable=False),
             Column('unidade_tratamento_id', Integer, ForeignKey('unidades_tratamento.id'), nullable=False),
             Column('comprovante_doacao', Integer, unique=True, nullable=False),
-            Column('qtd,doada', Integer, nullable=False, default=1),
+            Column('qtd_doada', Integer, nullable=False, default=1),
             Column('datahr_entrada_lote', DateTime, nullable=False)
         )
 
