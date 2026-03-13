@@ -113,8 +113,8 @@ class Tabela():
 
         self.entrega = Table('entregas', self.metadata,
             Column('id', Integer, primary_key=True),
-            Column('agente_id', Integer, ForeignKey('agentes.id'), unique=True, nullable=False),
-            Column('atendimento_id', Integer, ForeignKey('atendimentos.id'), unique=True, nullable=False),
+            Column('agente_id', Integer, ForeignKey('agentes.id'), nullable=False),
+            Column('atendimento_id', Integer, ForeignKey('atendimentos.id'), nullable=False),
             Column('comprovante_atendimento', Integer, unique=True, nullable=False),
             Column('datahr_entrega', DateTime, nullable=False),
             Column('datahr_saida', DateTime, nullable=False),
