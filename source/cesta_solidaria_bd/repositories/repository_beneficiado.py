@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from source.cesta_solidaria_bd.modules.beneficiado import Beneficiado
 
 class BeneficiadoRepository:
     def __init__(self, database):
@@ -6,34 +7,33 @@ class BeneficiadoRepository:
 
     #1.CRIAÇÃO
 
-    def create(self, tupla):
-        '''Recebe: (nome, familia_id, cpf, data_nasc, tel, renda, estudante)'''
+    def criar(self, beneficiado: Beneficiado):
         conexao = self.database.conectar()
         if conexao:
             try:
                 query = text("""
                     INSERT INTO beneficiados 
-                    (nome, familia_id, cpf, data_nascimento, tel_contato, renda, estudante, data_cadastro)
-                    VALUES (:nome, :familia_id, :cpf, :data_nasc, :tel, :renda, :estudante, NOW())
+                    (nome, familia_id, cpf, data_nascimento, tel_contato, renda, estudante)
+                    VALUES (:nome, :familia_id, :cpf, :data_nasc, :tel, :renda, :estudante)
                 """)
                 
                 result = conexao.execute(query, {
-                    "nome": tupla[0],
-                    "familia_id": tupla[1],
-                    "cpf": tupla[2],
-                    "data_nasc": tupla[3],
-                    "tel": tupla[4],
-                    "renda": tupla[5],
-                    "estudante": tupla[6]
+                    "nome": beneficiado.nome,
+                    "familia_id": beneficiado.familia_id,
+                    "cpf": beneficiado.cpf,
+                    "data_nasc": beneficiado.data_nascimento,
+                    "tel": beneficiado.tel_contato,
+                    "renda": beneficiado.renda,
+                    "estudante": 1 if beneficiado.estudante else 0
                 })
                 
-                obj_id = result.lastrowid 
+                beneficiado.id = result.lastrowid
                 conexao.commit()
-                return obj_id
+                return beneficiado
             except Exception as e:
                 print(f"Erro ao inserir: {e}")
                 return None
-        return "Erro de conexão"
+        return None
 
     #2.ATUALIZAÇÃO
 

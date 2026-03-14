@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from source.cesta_solidaria_bd.modules.deficiencia import Deficiencia
 
 class DeficienciaRepository:
     def __init__(self, database):
@@ -6,8 +7,7 @@ class DeficienciaRepository:
 
     #1.CRIAÇÃO
 
-    def create(self, tupla):
-        '''Recebe: (beneficiado_id, cod_deficiencia, descricao)'''
+    def create(self, deficiencia: Deficiencia):
         conexao = self.database.conectar()
         if conexao:
             try:
@@ -17,18 +17,18 @@ class DeficienciaRepository:
                 """)
                 
                 result = conexao.execute(query, {
-                    "b_id": tupla[0],
-                    "cod": tupla[1],
-                    "desc": tupla[2]
+                    "b_id": deficiencia.beneficiado_id,
+                    "cod": deficiencia.cod_deficiencia,
+                    "desc": deficiencia.descricao
                 })
                 
-                obj_id = result.lastrowid
+                deficiencia.id = result.lastrowid
                 conexao.commit()
-                return obj_id
+                return deficiencia
             except Exception as e:
                 print(f"Erro ao vincular deficiência: {e}")
                 return None
-        return "Erro de conexão"
+        return None
 
     #2.ATUALIZAÇÃO
 
