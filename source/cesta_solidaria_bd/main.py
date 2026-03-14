@@ -9,7 +9,6 @@ def inicializar_sistema():
     gerenciador_tabelas = Tabela()
     
     # 3. Executa a criação física no MySQL Workbench
-    # É aqui que o método que você definiu em tabelas.py é chamado
     try:
         gerenciador_tabelas.create_table(db)
         print("Tabelas criadas com sucesso no MySQL!")
