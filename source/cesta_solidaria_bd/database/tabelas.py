@@ -19,6 +19,8 @@ class Tabela():
 
         self.beneficiado = Table('beneficiados', self.metadata,
             Column('id', Integer, primary_key=True),
+            Column('nome', String(100), nullable=False), 
+            Column('familia_id', Integer, ForeignKey('familias.id'), nullable=False),
             Column('cpf', String(14), unique=True, nullable=False),
             Column('data_nascimento', Date, nullable=False),
             Column('tel_contato', String(20), unique=True),

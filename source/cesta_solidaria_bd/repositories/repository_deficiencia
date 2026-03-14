@@ -1,0 +1,57 @@
+from sqlalchemy import text
+
+class DeficienciaRepository:
+    def __init__(self, database):
+        self.database = database
+
+    #1.CRIAÇÃO
+
+    def create(self, tupla):
+        '''Recebe: (beneficiado_id, cod_deficiencia, descricao)'''
+        conexao = self.database.conectar()
+        if conexao:
+            try:
+                query = text("""
+                    INSERT INTO deficiencias (beneficiado_id, cod_deficiencia, descricao)
+                    VALUES (:b_id, :cod, :desc)
+                """)
+                
+                result = conexao.execute(query, {
+                    "b_id": tupla[0],
+                    "cod": tupla[1],
+                    "desc": tupla[2]
+                })
+                
+                obj_id = result.lastrowid
+                conexao.commit()
+                return obj_id
+            except Exception as e:
+                print(f"Erro ao vincular deficiência: {e}")
+                return None
+        return "Erro de conexão"
+
+    #2.ATUALIZAÇÃO
+
+    def update(self, id, nome_atributo, novo_valor):
+        '''Atualiza um atributo específico de deficiencia pelo ID.'''
+        conexao = self.database.conectar()
+        if conexao:
+            try:
+                query = text(f"UPDATE deficiencias SET {nome_atributo} = :valor WHERE id = :id")
+                conexao.execute(query, {"valor": novo_valor, "id": id})
+                conexao.commit()
+                return True
+            except Exception as e:
+                print(f"Erro ao atualizar deficiência: {e}")
+                return False
+        return "Erro de conexão"
+    
+    #3.CONSULTAS
+
+    def buscar_por_beneficiado(self, beneficiado_id):
+        '''Retorna todas as deficiências registradas para um beneficiado específico.'''
+        conexao = self.database.conectar()
+        if conexao:
+            query = text("SELECT * FROM deficiencias WHERE beneficiado_id = :b_id")
+            return conexao.execute(query, {"b_id": beneficiado_id}).fetchall()
+        return "Erro de conexão"
