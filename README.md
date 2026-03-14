@@ -56,4 +56,15 @@ cesta_solidaria
 
 ```
 
+## Diagramas de Modelagem Inicial do Banco de Dados
+
+### 1. Diagrama Emtidade-Relacionamento
+![Diagrama Entidade-Relacionamento](./models/der.jpg)
+
+### 2. Modelo Entidade-Relacionamento
+![Modelo Entidade-Relacionamento](./models/mer.jpg)
+
+### 3. Mapeamento Lógico
+![Mapeamento Lógico](./models/mp_logico.jpg)
+
 
