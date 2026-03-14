@@ -1,9 +1,10 @@
-from .repository_agente import Repository_agente
-from .repository_atendimento import Repository_atendimento
-from .repository_entrega import Repository_entrega
+from .repository_agente import RepositorioAgente
+from .repository_atendimento import RepositorioAtendimento
+from .repository_entrega import RepositorioEntrega
 
 __all__ = [
-	"Repository_agente",
-	"Repository_atendimento",
-	"Repository_entrega",
+	"RepositorioAgente",
+	"RepositorioAtendimento",
+	"RepositorioEntrega",
 ]
+	

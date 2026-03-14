@@ -26,4 +26,4 @@ class Entrega:
             "datahr_saida": self.datahr_saida,
             "assinatura_agente": self.assinatura_agente,
             "assinatura_destinatario": self.assinatura_destinatario,
-        }
+        } 

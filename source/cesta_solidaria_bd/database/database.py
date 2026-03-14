@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from config_database import Config_database
+from source.cesta_solidaria_bd.database.config_database import Config_database
 
 config = Config_database()
 

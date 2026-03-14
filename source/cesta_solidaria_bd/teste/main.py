@@ -1,5 +1,9 @@
-from database.database import Database
-from database.tabelas import Tabela
+
+from source.cesta_solidaria_bd.database.tabelas import Tabela
+from source.cesta_solidaria_bd.database.database import Database
+from source.cesta_solidaria_bd.teste.cli import run_cli
+
+
 
 def inicializar_sistema():
     # 1. Instancia a conexão (Ambiente 'real' para conectar ao MySQL)
@@ -17,3 +21,4 @@ def inicializar_sistema():
 
 if __name__ == "__main__":
     inicializar_sistema()
+    run_cli() 
