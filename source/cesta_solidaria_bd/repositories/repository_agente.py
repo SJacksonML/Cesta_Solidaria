@@ -2,91 +2,126 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import delete, insert, select, update
-
 from source.cesta_solidaria_bd.database.database import Database
 from source.cesta_solidaria_bd.database.tabelas import Tabela
 from source.cesta_solidaria_bd.modules.agente import Agente
 
 
-class Repository_agente:
+
+class RepositorioAgente:
     """Camada de acesso a dados para entidade Agente."""
 
     def __init__(self, database: Database):
         self.database = database
-        self.tabela_agente = Tabela().agente
 
-    def criar(self, agente: Agente) -> Agente:
+
+    def create(self, agente: Agente) -> Agente:
         if agente.id_agente is not None:
             raise ValueError("Nao informe id_agente no create; o banco gera esse valor automaticamente.")
 
-        dados = {
+        query = """
+            INSERT INTO agentes (cpf, nome, tel_contato)
+            VALUES (%(cpf)s, %(nome)s, %(tel_contato)s)
+        """
+        valores = {
+            "cpf": agente.cpf,
+            "nome": agente.nome,
+            "tel_contato": agente.tel_contato
+        }
+
+        conexao = self.database.conectar()
+        if conexao is None:
+            raise ConnectionError("Não foi possível conectar ao banco de dados.")
+        try:
+            with conexao.cursor() as cursor:
+                cursor.execute(query, valores)
+                agente.id_agente = cursor.lastrowid
+            conexao.commit()
+        finally:
+            conexao.close()
+        return agente
+
+    def read(self, id_agente: int) -> Optional[Agente]:
+        query = "SELECT id, cpf, nome, tel_contato FROM agentes WHERE id = %(id)s"
+        conexao = self.database.conectar()
+        if conexao is None:
+            raise ConnectionError("Não foi possível conectar ao banco de dados.")
+        try:
+            with conexao.cursor() as cursor:
+                cursor.execute(query, {"id": id_agente})
+                linha = cursor.fetchone()
+        finally:
+            conexao.close()
+        if linha is None:
+            return None
+        return self._para_entidade_dict(linha)
+
+    def list(self) -> list[Agente]:
+        query = "SELECT id, cpf, nome, tel_contato FROM agentes ORDER BY nome"
+        conexao = self.database.conectar()
+        if conexao is None:
+            raise ConnectionError("Não foi possível conectar ao banco de dados.")
+        try:
+            with conexao.cursor() as cursor:
+                cursor.execute(query)
+                linhas = cursor.fetchall()
+        finally:
+            conexao.close()
+        return [self._para_entidade_dict(linha) for linha in linhas]
+
+    def update(self, agente: Agente) -> bool:
+        if agente.id_agente is None:
+            raise ValueError("id_agente é obrigatório para atualizar um agente.")
+
+        query = f"""
+            UPDATE agentes SET cpf = %(cpf)s, nome = %(nome)s, tel_contato = %(tel_contato)s WHERE id = %(id)s
+        """
+        valores = {
             "cpf": agente.cpf,
             "nome": agente.nome,
             "tel_contato": agente.tel_contato,
+            "id": agente.id_agente
         }
 
-        stmt = insert(self.tabela_agente).values(**dados)
+        conexao = self.database.conectar()
+        if conexao is None:
+            raise ConnectionError("Não foi possível conectar ao banco de dados.")
+        try:
+            with conexao.cursor() as cursor:
+                cursor.execute(query, valores)
+                atualizado = cursor.rowcount > 0
+            conexao.commit()
+        finally:
+            conexao.close()
+        return atualizado
 
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-            pk = result.inserted_primary_key
-            if pk and pk[0] is not None:
-                agente.id_agente = int(pk[0])
-
-        return agente
-
-    def buscar_por_id(self, id_agente: int) -> Optional[Agente]:
-        stmt = select(self.tabela_agente).where(self.tabela_agente.c.id == id_agente)
-
-        with self.database.session.connect() as conn:
-            row = conn.execute(stmt).mappings().first()
-
-        if row is None:
-            return None
-
-        return self._para_entidade(row)
-
-    def listar(self) -> list[Agente]:
-        stmt = select(self.tabela_agente)
-
-        with self.database.session.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
-
-        return [self._para_entidade(row) for row in rows]
-
-    def atualizar(self, agente: Agente) -> bool:
-        if agente.id_agente is None:
-            raise ValueError("id_agente e obrigatorio para atualizar um agente.")
-
-        stmt = (
-            update(self.tabela_agente)
-            .where(self.tabela_agente.c.id == agente.id_agente)
-            .values(
-                cpf=agente.cpf,
-                nome=agente.nome,
-                tel_contato=agente.tel_contato,
-            )
-        )
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-
-        return result.rowcount > 0
-
-    def deletar(self, id_agente: int) -> bool:
-        stmt = delete(self.tabela_agente).where(self.tabela_agente.c.id == id_agente)
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-
-        return result.rowcount > 0
+    def delete(self, id_agente: int) -> bool:
+        query = "DELETE FROM agentes WHERE id = %(id)s"
+        conexao = self.database.conectar()
+        if conexao is None:
+            raise ConnectionError("Não foi possível conectar ao banco de dados.")
+        try:
+            with conexao.cursor() as cursor:
+                cursor.execute(query, {"id": id_agente})
+                deletado = cursor.rowcount > 0
+            conexao.commit()
+        finally:
+            conexao.close()
+        return deletado
 
     @staticmethod
-    def _para_entidade(row) -> Agente:
-        return Agente(
-            id_agente=int(row["id"]),
-            cpf=row["cpf"],
-            nome=row["nome"],
-            tel_contato=row["tel_contato"],
-        )
+    def _para_entidade_dict(linha) -> Agente:
+        if isinstance(linha, dict):
+            return Agente(
+                id_agente=int(linha["id"]),
+                cpf=linha["cpf"],
+                nome=linha["nome"],
+                tel_contato=linha["tel_contato"],
+            )
+        else:
+            return Agente(
+                id_agente=int(linha[0]),
+                cpf=linha[1],
+                nome=linha[2],
+                tel_contato=linha[3],
+            )
