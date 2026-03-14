@@ -19,7 +19,7 @@ O sistema **Cesta Solidária** tem como objetivo a implementação dos conceitos
 
 O Sistema Gerenciador de Banco de Dados utilizado é o MySQL, que utiliza a Structured Query Language (SQL) como linguagem para estruturação e manipulação dos dados que são inseridos, transferidos e encaminhados dentro da interface, incluindo criação de tabelas, chaves primárias, chaves estrangeiras e restrições de integridade, além da normalização da estrutura dos dados. Essa estruturração é baseada em modelos previamente construidos e validados, afim de garantir a sustentação e prevenção de inconsistências.
 
-A aplicação utiliza o Python como principal linguagem de programação e interface, no qual o código é estruturado baseando-se na modelagem DDD (Domain-Driven-Design), que se caracteriza na divisão de claasses dentro do projeto, com foco uma linguagem ubíqua, baseando-se em um modelo de negócio.
+A aplicação utiliza o Python como principal linguagem de programação e interface, no qual o código é estruturado baseando-se na modelagem DDD (Domain-Driven-Design), que se caracteriza na divisão de classes dentro do projeto, com foco uma linguagem ubíqua, baseando-se em um modelo de negócio.
 
 ## Estruturação dos Arquivos
 
