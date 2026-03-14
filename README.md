@@ -58,7 +58,7 @@ cesta_solidaria
 
 ## Diagramas de Modelagem Inicial do Banco de Dados
 
-### 1. Diagrama Emtidade-Relacionamento
+### 1. Diagrama Entidade-Relacionamento
 ![Diagrama Entidade-Relacionamento](./models/der.jpg)
 
 ### 2. Modelo Entidade-Relacionamento
