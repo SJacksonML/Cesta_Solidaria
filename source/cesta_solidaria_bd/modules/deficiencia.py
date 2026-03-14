@@ -1,18 +1,7 @@
-from dataclasses import dataclass
-from typing import Any, Optional
-
-@dataclass(slots=True)
 class Deficiencia:
-    """Representa uma deficiência vinculada a um beneficiado."""
-    beneficiado_id: int
-    cod_deficiencia: str
-    descricao: str
-    id_deficiencia: Optional[int] = None
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "id_deficiencia": self.id_deficiencia,
-            "beneficiado_id": self.beneficiado_id,
-            "cod_deficiencia": self.cod_deficiencia,
-            "descricao": self.descricao,
-        }
+    '''Classe que representa a entidade deficiência'''
+    def __init__(self, beneficiado_id, cod_deficiencia, descricao, deficiencia_id=None):
+        self.id = deficiencia_id
+        self.beneficiado_id = beneficiado_id
+        self.cod_deficiencia = cod_deficiencia
+        self.descricao = descricao
