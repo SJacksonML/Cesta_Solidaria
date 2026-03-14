@@ -6,7 +6,7 @@ from sqlalchemy import and_, delete, insert, select, update
 
 from source.cesta_solidaria_bd.database.database import Database
 from source.cesta_solidaria_bd.database.tabelas import Tabela
-from source.cesta_solidaria_bd.modules.entrega import Familia
+from source.cesta_solidaria_bd.modules.familia import Familia
 
 
 class Repository_familia:
@@ -15,7 +15,6 @@ class Repository_familia:
     def __init__(self, database: Database):
         self.database = database
         self.tabela_familia = Tabela().familia
-        self.tabela_vulnerabilidade = Tabela().vulnerabilidade
 
     def criar(self, familia: Familia) -> Familia:
         if familia.id_familia is not None:
