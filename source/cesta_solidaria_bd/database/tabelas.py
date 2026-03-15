@@ -26,7 +26,7 @@ class Tabela():
             Column('tel_contato', String(20), unique=True),
             Column('renda', Numeric(10,2), nullable=False, default=0),
             Column('estudante', Boolean, nullable=False),
-            Column('data_cadastro', DateTime, nullable=False, default=datetime.now)
+            Column('data_cadastro', DateTime, nullable=False)
         )
 
         self.familias = Table('familias', self.metadata,

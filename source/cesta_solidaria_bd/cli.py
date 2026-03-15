@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database.database import Database
 from database.tabelas import Tabela
+from datetime import datetime
 from repositories.repository_agente import RepositorioAgente
 from repositories.repository_atendimento import RepositorioAtendimento
 from repositories.repository_beneficiado import BeneficiadoRepository
@@ -297,7 +298,8 @@ def menu_beneficiado(db):
                     data_nascimento=data_nasc,
                     tel_contato=tel,
                     renda=float(renda),
-                    estudante=estudante
+                    estudante=estudante,
+                    data_cadastro=datetime.now()
                 )
                 resultado = repo.criar(b)
                 if resultado:

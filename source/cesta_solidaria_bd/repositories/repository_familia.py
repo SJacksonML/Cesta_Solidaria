@@ -16,14 +16,14 @@ class Repository_familia:
             try:
                 query = text("""
                     INSERT INTO familias
-                    (id_vulnerabilidade, cep, renda_media, qtd_membros)
+                    (vulnerabilidade_id, CEP, renda_media, qtd_membros)
                     VALUES
-                    (:id_vulnerabilidade, :cep, :renda_media, :qtd_membros)
+                    (:vulnerabilidade_id, :CEP, :renda_media, :qtd_membros)
                 """)
 
                 result = conexao.execute(query, {
-                    "id_vulnerabilidade": familia.id_vulnerabilidade,
-                    "cep": familia.cep,
+                    "vulnerabilidade_id": familia.id_vulnerabilidade,
+                    "CEP": familia.cep,
                     "renda_media": familia.renda_media,
                     "qtd_membros": familia.qtd_membros
                 })
@@ -81,8 +81,8 @@ class Repository_familia:
             for row in result.mappings():
                 familia = Familia(
                     id_familia=row['id'],
-                    id_vulnerabilidade=row['id_vulnerabilidade'],
-                    cep=row['cep'],
+                    id_vulnerabilidade=row['vulnerabilidade_id'],
+                    cep=row['CEP'],
                     renda_media=row['renda_media'],
                     qtd_membros=row['qtd_membros']
                 )
@@ -103,7 +103,7 @@ class Repository_familia:
             query = text("""
                 SELECT f.*
                 FROM familias f
-                JOIN vulnerabilidades v ON f.id_vulnerabilidade = v.id
+                JOIN vulnerabilidades v ON f.vulnerabilidade_id = v.id
                 ORDER BY v.indice_vuln ASC
             """)
 
@@ -113,8 +113,8 @@ class Repository_familia:
             for row in result.mappings():
                 familia = Familia(
                     id_familia=row['id'],
-                    id_vulnerabilidade=row['id_vulnerabilidade'],
-                    cep=row['cep'],
+                    id_vulnerabilidade=row['vulnerabilidade_id'],
+                    cep=row['CEP'],
                     renda_media=row['renda_media'],
                     qtd_membros=row['qtd_membros']
                 )
@@ -139,8 +139,8 @@ class Repository_familia:
             if row:
                 familia = Familia(
                     id_familia=row['id'],
-                    id_vulnerabilidade=row['id_vulnerabilidade'],
-                    cep=row['cep'],
+                    id_vulnerabilidade=row['vulnerabilidade_id'],
+                    cep=row['CEP'],
                     renda_media=row['renda_media'],
                     qtd_membros=row['qtd_membros']
                 )
@@ -164,8 +164,8 @@ class Repository_familia:
             for row in result.mappings():
                 familia = Familia(
                     id_familia=row['id'],
-                    id_vulnerabilidade=row['id_vulnerabilidade'],
-                    cep=row['cep'],
+                    id_vulnerabilidade=row['vulnerabilidade_id'],
+                    cep=row['CEP'],
                     renda_media=row['renda_media'],
                     qtd_membros=row['qtd_membros']
                 )
