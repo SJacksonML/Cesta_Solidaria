@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from source.cesta_solidaria_bd.database.database import Database
 from source.cesta_solidaria_bd.modules.familia import Familia
 
 class Repository_familia:

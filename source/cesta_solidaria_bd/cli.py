@@ -714,3 +714,5 @@ def menu_principal():
 
 if __name__ == "__main__":
     menu_principal()
+
+# python3 source/cesta_solidaria_bd/cli.py
