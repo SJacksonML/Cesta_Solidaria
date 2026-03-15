@@ -1,92 +1,70 @@
-from __future__ import annotations
 
-from typing import Optional
-
-from sqlalchemy import delete, insert, select, update
-
+from sqlalchemy import text
 from source.cesta_solidaria_bd.database.database import Database
-from source.cesta_solidaria_bd.database.tabelas import Tabela
-from source.cesta_solidaria_bd.modules.agente import Agente
 
 
-class Repository_agente:
-    """Camada de acesso a dados para entidade Agente."""
-
+class RepositorioAgente:
     def __init__(self, database: Database):
         self.database = database
-        self.tabela_agente = Tabela().agente
 
-    def criar(self, agente: Agente) -> Agente:
-        if agente.id_agente is not None:
-            raise ValueError("Nao informe id_agente no create; o banco gera esse valor automaticamente.")
 
-        dados = {
-            "cpf": agente.cpf,
-            "nome": agente.nome,
-            "tel_contato": agente.tel_contato,
-        }
-
-        stmt = insert(self.tabela_agente).values(**dados)
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-            pk = result.inserted_primary_key
-            if pk and pk[0] is not None:
-                agente.id_agente = int(pk[0])
-
-        return agente
-
-    def buscar_por_id(self, id_agente: int) -> Optional[Agente]:
-        stmt = select(self.tabela_agente).where(self.tabela_agente.c.id == id_agente)
-
-        with self.database.session.connect() as conn:
-            row = conn.execute(stmt).mappings().first()
-
-        if row is None:
+    def create(self, cpf, nome, tel_contato):
+        conexao = self.database.conectar()
+        if conexao:
+            query = text("""
+                INSERT INTO agentes (cpf, nome, tel_contato)
+                VALUES (:cpf, :nome, :tel_contato)
+            """)
+            valores = {"cpf": cpf, "nome": nome, "tel_contato": tel_contato}
+            result = conexao.execute(query, valores)
+            last_id = result.lastrowid if hasattr(result, 'lastrowid') else None
+            conexao.commit()
+            conexao.close()
+            return last_id
+        else:
             return None
 
-        return self._para_entidade(row)
 
-    def listar(self) -> list[Agente]:
-        stmt = select(self.tabela_agente)
+    def read(self, id_agente):
+        conexao = self.database.conectar()
+        if conexao:
+            query = text("SELECT * FROM agentes WHERE id = :id")
+            result = conexao.execute(query, {"id": id_agente}).first()
+            conexao.close()
+            return result
+        return None
 
-        with self.database.session.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
 
-        return [self._para_entidade(row) for row in rows]
+    def list(self):
+        conexao = self.database.conectar()
+        if conexao:
+            query = text("SELECT * FROM agentes ORDER BY nome")
+            results = conexao.execute(query).fetchall()
+            conexao.close()
+            return results
+        return []
 
-    def atualizar(self, agente: Agente) -> bool:
-        if agente.id_agente is None:
-            raise ValueError("id_agente e obrigatorio para atualizar um agente.")
 
-        stmt = (
-            update(self.tabela_agente)
-            .where(self.tabela_agente.c.id == agente.id_agente)
-            .values(
-                cpf=agente.cpf,
-                nome=agente.nome,
-                tel_contato=agente.tel_contato,
-            )
-        )
+    def update(self, id_agente, cpf, nome, tel_contato):
+        conexao = self.database.conectar()
+        if conexao:
+            query = text('''UPDATE agentes SET cpf = :cpf, nome = :nome, tel_contato = :tel_contato WHERE id = :id''')
+            valores = {"cpf": cpf, "nome": nome, "tel_contato": tel_contato, "id": id_agente}
+            result = conexao.execute(query, valores)
+            atualizado = result.rowcount > 0 if hasattr(result, 'rowcount') else False
+            conexao.commit()
+            conexao.close()
+            return atualizado
+        return False
 
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
 
-        return result.rowcount > 0
-
-    def deletar(self, id_agente: int) -> bool:
-        stmt = delete(self.tabela_agente).where(self.tabela_agente.c.id == id_agente)
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-
-        return result.rowcount > 0
-
-    @staticmethod
-    def _para_entidade(row) -> Agente:
-        return Agente(
-            id_agente=int(row["id"]),
-            cpf=row["cpf"],
-            nome=row["nome"],
-            tel_contato=row["tel_contato"],
-        )
+    def delete(self, id_agente):
+        conexao = self.database.conectar()
+        if conexao:
+            query = text("DELETE FROM agentes WHERE id = :id")
+            result = conexao.execute(query, {"id": id_agente})
+            deletado = result.rowcount > 0 if hasattr(result, 'rowcount') else False
+            conexao.commit()
+            conexao.close()
+            return deletado
+        return False

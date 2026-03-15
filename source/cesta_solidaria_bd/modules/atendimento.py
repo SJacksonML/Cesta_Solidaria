@@ -1,16 +1,11 @@
-from dataclasses import dataclass
-from typing import Any, Optional
-
-
-@dataclass(slots=True)
 class Atendimento:
     """Representa um atendimento associado a uma familia."""
+    def __init__(self, id_familia, relatorio, id_atendimento=None):
+        self.id_familia = id_familia
+        self.relatorio = relatorio
+        self.id_atendimento = id_atendimento
 
-    id_familia: int
-    relatorio: str
-    id_atendimento: Optional[int] = None
-
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self):
         return {
             "id_atendimento": self.id_atendimento,
             "id_familia": self.id_familia,
