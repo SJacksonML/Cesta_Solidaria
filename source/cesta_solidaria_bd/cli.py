@@ -21,7 +21,8 @@ from modules.familia import Familia
 
 
 def limpar_tela():
-    os.system("clear")
+    comando = "cls" if os.name == "nt" else "clear"
+    os.system(comando)
 
 
 def pausar():
