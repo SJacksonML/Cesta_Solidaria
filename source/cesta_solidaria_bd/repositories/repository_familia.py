@@ -1,131 +1,178 @@
-from __future__ import annotations
-
-from typing import Any, Optional
-
-from sqlalchemy import and_, delete, insert, select, update
-
-from source.cesta_solidaria_bd.database.database import Database
-from source.cesta_solidaria_bd.database.tabelas import Tabela
+from sqlalchemy import text
 from source.cesta_solidaria_bd.modules.familia import Familia
 
-
 class Repository_familia:
-    """Camada de acesso a dados para entidade Familia."""
-
     def __init__(self, database: Database):
         self.database = database
-        self.tabela_familia = Tabela().familia
 
-    def criar(self, familia: Familia) -> Familia:
-        if familia.id_familia is not None:
-            raise ValueError("Nao informe id_familia no create; o banco gera esse valor automaticamente.")
+    #1.CRIAÇÃO
+
+    def criar(self, familia: Familia):
+
+        conexao = self.database.conectar()
         
-        if not self._existe_vulnerabilidade(familia.id_vulnerabilidade):
-            raise ValueError("id_vulnerabilidade informado nao existe.")
+        if conexao:
+            try:
+                query = text("""
+                    INSERT INTO familias
+                    (id_vulnerabilidade, cep, renda_media, qtd_membros)
+                    VALUES
+                    (:id_vulnerabilidade, :cep, :renda_media, :qtd_membros)
+                """)
 
-        dados = {
-            "vulnerabilidade_id": familia.id_vulnerabilidade,
-            "CEP": familia.cep,
-            "renda_media": familia.renda_media,
-            "qtd_membros": familia.qtd_membros,
-        }
+                result = conexao.execute(query, {
+                    "id_vulnerabilidade": familia.id_vulnerabilidade,
+                    "cep": familia.cep,
+                    "renda_media": familia.renda_media,
+                    "qtd_membros": familia.qtd_membros
+                })
 
-        stmt = insert(self.tabela_familia).values(**dados)
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-            pk = result.inserted_primary_key
-            if pk and pk[0] is not None:
-                familia.id_familia = int(pk[0])
-
-        return familia
+                familia.id_familia = result.lastrowid
+                conexao.commit()
+                conexao.close()
+                return familia
+            
+            except Exception as e:
+                print(f"Erro ao inserir: {e}")
+                conexao.rollback()
+                conexao.close()
+                return None
+            
+        return None
     
-    def buscar_por_id(self, id_familia: int) -> Optional[Familia]:
-        stmt = select(self.tabela_familia).where(self.tabela_familia.c.id == id_familia)
-
-        with self.database.session.connect() as conn:
-            row = conn.execute(stmt).mappings().first()
-
-        if row is None:
-            return None
-
-        return self._para_entidade(row)
     
-    def listar(self) -> list[Familia]:
-        stmt = select(self.tabela_familia)
+    # ----------- 2.ATUALIZAÇÃO ------------
 
-        with self.database.session.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
+    def update(self, id, nome_atributo, novo_valor):
+        '''Atualiza um atributo específico de uma família pelo ID.'''
 
-        return [self._para_entidade(row) for row in rows]
-    
-    def atualizar(self, familia: Familia) -> bool:
-        if familia.id_familia is None:
-            raise ValueError("id_familia e obrigatório para atualizar uma familia.")
+        conexao = self.database.conectar()
+
+        if conexao:
+            try:
+                query = text(f"UPDATE familias SET {nome_atributo} = :valor WHERE id = :id")
+                conexao.execute(query, {"valor": novo_valor, "id": id})
+                conexao.commit()
+                conexao.close()
+                return True
+            
+            except Exception as e:
+                print(f"Erro ao atualizar: {e}")
+                conexao.rollback()
+                conexao.close()
+                return False
+            
+        return "Erro de conexão"
         
-        if not self._existe_vulnerabilidade(familia.id_vulnerabilidade):
-            raise ValueError("id_vulnerabilidade informado não existe.")
-
-        stmt = (
-            update(self.tabela_familia)
-            .where(self.tabela_familia.c.id == familia.id_familia)
-            .values(
-                vulnerabilidade_id=familia.id_vulnerabilidade,
-                CEP=familia.cep,
-                renda_media=familia.renda_media,
-                qtd_membros=familia.qtd_membros,
-            )
-        )
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-
-        return result.rowcount > 0
     
-    def deletar(self, id_familia: int) -> bool:
-        stmt = delete(self.tabela_familia).where(self.tabela_familia.c.id == id_familia)
-
-        with self.database.session.begin() as conn:
-            result = conn.execute(stmt)
-
-        return result.rowcount > 0
+    # ------------ 3.CONSULTAS ------------
     
-    def listar_por_quantidade_membros(self, qtd_minima: int = 4) -> list[Familia]:
-        """Retorna todas as famílias com quantidade de membros maior que qtd_minima."""
-        stmt = select(self.tabela_familia).where(self.tabela_familia.c.qtd_membros > qtd_minima)
+    def listar_qtd_membros_maior_que_quatro(self, qtd):
+        """Listar famílias com mais de 4 membros."""
 
-        with self.database.session.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
+        conexao = self.database.conectar()
 
-        return [self._para_entidade(row) for row in rows]
-    
-    def listar_ordenado_por_vulnerabilidade(self) -> list[Familia]:
-        """Retorna todas as famílias ordenadas em ordem crescente de vulnerabilidade."""
-        stmt = (
-            select(self.tabela_familia)
-            .select_from(self.tabela_familia.join(self.tabela_vulnerabilidade, self.tabela_familia.c.vulnerabilidade_id == self.tabela_vulnerabilidade.c.id))
-            .order_by(self.tabela_vulnerabilidade.c.indice_vuln)
-        )
+        if conexao:
+            query = text("SELECT * FROM familias WHERE qtd_membros > :qtd")
+            result = conexao.execute(query, {"qtd": qtd})
+            familias = []
 
-        with self.database.session.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
+            for row in result.mappings():
+                familia = Familia(
+                    id_familia=row['id'],
+                    id_vulnerabilidade=row['id_vulnerabilidade'],
+                    cep=row['cep'],
+                    renda_media=row['renda_media'],
+                    qtd_membros=row['qtd_membros']
+                )
 
-        return [self._para_entidade(row) for row in rows]
-    
-    def _existe_vulnerabilidade(self, id_vulnerabilidade: int) -> bool:
-        stmt = select(self.tabela_vulnerabilidade).where(self.tabela_vulnerabilidade.c.id == id_vulnerabilidade)
+                familias.append(familia)
 
-        with self.database.session.connect() as conn:
-            row = conn.execute(stmt).mappings().first()
+            conexao.close()
+            return familias
+        
+        return None
 
-        return row is not None
+    def listar_ordenado_por_vulnerabilidade(self):
+        """Join Família + Vulnerabilidade ordenado por id da vulnerabilidade"""
+        
+        conexao = self.database.conectar()
 
-    @staticmethod
-    def _para_entidade(row: Any) -> Familia:
-        return Familia(
-            id_familia=int(row["id"]),
-            id_vulnerabilidade=int(row["vulnerabilidade_id"]),
-            cep=row["CEP"],
-            renda_media=float(row["renda_media"]),
-            qtd_membros=int(row["qtd_membros"]),
-        )
+        if conexao:
+            query = text("""
+                SELECT f.*
+                FROM familias f
+                JOIN vulnerabilidades v ON f.id_vulnerabilidade = v.id
+                ORDER BY v.indice_vuln ASC
+            """)
+
+            result = conexao.execute(query)
+            familias = []
+
+            for row in result.mappings():
+                familia = Familia(
+                    id_familia=row['id'],
+                    id_vulnerabilidade=row['id_vulnerabilidade'],
+                    cep=row['cep'],
+                    renda_media=row['renda_media'],
+                    qtd_membros=row['qtd_membros']
+                )
+                
+                familias.append(familia)
+
+            conexao.close()
+            return familias
+        
+        return None
+
+    def buscar_por_id(self, id_familia):
+        """Busca uma família pelo ID."""
+
+        conexao = self.database.conectar()
+
+        if conexao:
+            query = text("SELECT * FROM familias WHERE id = :id")
+            result = conexao.execute(query, {"id": id_familia})
+            row = result.mappings().fetchone()
+
+            if row:
+                familia = Familia(
+                    id_familia=row['id'],
+                    id_vulnerabilidade=row['id_vulnerabilidade'],
+                    cep=row['cep'],
+                    renda_media=row['renda_media'],
+                    qtd_membros=row['qtd_membros']
+                )
+            
+                conexao.close()
+                return familia
+
+            conexao.close()
+        return None
+
+    def listar(self):
+        """Listar todas as famílias cadastradas."""
+
+        conexao = self.database.conectar()
+
+        if conexao:
+            query = text("SELECT * FROM familias")
+            result = conexao.execute(query)
+            familias = []
+
+            for row in result.mappings():
+                familia = Familia(
+                    id_familia=row['id'],
+                    id_vulnerabilidade=row['id_vulnerabilidade'],
+                    cep=row['cep'],
+                    renda_media=row['renda_media'],
+                    qtd_membros=row['qtd_membros']
+                )
+
+                familias.append(familia)
+
+            conexao.close()
+            return familias
+        
+        return None
+       
