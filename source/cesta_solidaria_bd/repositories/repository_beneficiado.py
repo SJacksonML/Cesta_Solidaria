@@ -13,8 +13,8 @@ class BeneficiadoRepository:
             try:
                 query = text("""
                     INSERT INTO beneficiados 
-                    (nome, familia_id, cpf, data_nascimento, tel_contato, renda, estudante)
-                    VALUES (:nome, :familia_id, :cpf, :data_nasc, :tel, :renda, :estudante)
+                    (nome, familia_id, cpf, data_nascimento, tel_contato, renda, estudante, data_cadastro)
+                    VALUES (:nome, :familia_id, :cpf, :data_nasc, :tel, :renda, :estudante, :data_cadastro)
                 """)
                 
                 result = conexao.execute(query, {
@@ -24,7 +24,8 @@ class BeneficiadoRepository:
                     "data_nasc": beneficiado.data_nascimento,
                     "tel": beneficiado.tel_contato,
                     "renda": beneficiado.renda,
-                    "estudante": 1 if beneficiado.estudante else 0
+                    "estudante": 1 if beneficiado.estudante else 0,
+                    "data_cadastro": beneficiado.data_cadastro
                 })
                 
                 beneficiado.id = result.lastrowid

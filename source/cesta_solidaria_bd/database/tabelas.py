@@ -17,7 +17,7 @@ class Tabela():
 
 # ----------------------------------------------------- PESSOAS/ENTIDADES -----------------------------------------------------
 
-        self.beneficiado = Table('beneficiados', self.metadata,
+        self.beneficiados = Table('beneficiados', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('nome', String(100), nullable=False), 
             Column('familia_id', Integer, ForeignKey('familias.id'), nullable=False),
@@ -26,10 +26,10 @@ class Tabela():
             Column('tel_contato', String(20), unique=True),
             Column('renda', Numeric(10,2), nullable=False, default=0),
             Column('estudante', Boolean, nullable=False),
-            Column('data_cadastro', DateTime, nullable=False, default=datetime.now)
+            Column('data_cadastro', DateTime, nullable=False)
         )
 
-        self.familia = Table('familias', self.metadata,
+        self.familias = Table('familias', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('vulnerabilidade_id', Integer, ForeignKey('vulnerabilidades.id'), unique=True, nullable=False),
             Column('CEP', String(9), nullable=False),
@@ -37,14 +37,14 @@ class Tabela():
             Column('qtd_membros', Integer, nullable=False, default=1)
         )
 
-        self.agente = Table('agentes', self.metadata,
+        self.agentes = Table('agentes', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('cpf', String(14), unique=True, nullable=False),
             Column('nome', String(100), nullable=False),
             Column('tel_contato', String(20), nullable=False)
         )
 
-        self.fornecedor = Table('fornecedores', self.metadata,
+        self.fornecedores = Table('fornecedores', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('CNPJ', String(18), unique=True, nullable=False),
             Column('tipo', String(50), nullable=False), # 'EMPRESA PRIVADA', 'EMPRESA ESTATAL', 'ONG'
@@ -52,7 +52,7 @@ class Tabela():
             Column('tel_contato', String(20), unique=True, nullable=False)
         )
 
-        self.unidade_tratamento = Table('unidades_tratamento', self.metadata,
+        self.unidades_tratamento = Table('unidades_tratamento', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('nome', String(100), unique=True, nullable=False),
             Column('CEP', String(9), nullable=False),
@@ -60,25 +60,25 @@ class Tabela():
         )
 # -------------------------------------------------- ESTRATÉGIA E SERVIÇOS ---------------------------------------------------
 
-        self.vulnerabilidade = Table('vulnerabilidades', self.metadata,
+        self.vulnerabilidades = Table('vulnerabilidades', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('indice_vuln', Integer, nullable=False, default=1),
             Column('mod_crise', Integer, nullable=False, default=0)
         )
 
-        self.atendimento = Table('atendimentos', self.metadata,
+        self.atendimentos = Table('atendimentos', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('familia_id', Integer, ForeignKey('familias.id'), nullable=False),
             Column('relatorio', Text, nullable=False, default=None)
         )
 
-        self.estoque = Table('estoques', self.metadata,
+        self.estoques = Table('estoques', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('capacidade_max', Integer, nullable=False),
             Column('ocupacao_atual', Integer, nullable=False)
         )
 
-        self.lote = Table('lotes', self.metadata,
+        self.lotes = Table('lotes', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('vulnerabilidade_id', Integer, ForeignKey('vulnerabilidades.id'), unique=True, nullable=False),
             Column('etiqueta', String(50), unique=True, nullable=False),
@@ -86,7 +86,7 @@ class Tabela():
             Column('datahr_entrada', DateTime, nullable=False, default=datetime.now)
         )
 
-        self.cesta = Table('cestas', self.metadata,
+        self.cestas = Table('cestas', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('lote_id', Integer, ForeignKey('lotes.id'), nullable=False),
             Column('data_validade', Date, nullable=False),
@@ -96,14 +96,14 @@ class Tabela():
 
 # --------------------------------------- TABELAS DE RELACIONAMENTOS OPCIONAIS (0:N) ----------------------------------------
 
-        self.deficiencia = Table('deficiencias', self.metadata,
+        self.deficiencias = Table('deficiencias', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('beneficiado_id', Integer, ForeignKey('beneficiados.id'), nullable=False),
             Column('cod_deficiencia', String(20), nullable=False),
             Column('descricao', Text, nullable=False)
         )
 
-        self.alteracao = Table('alteracoes', self.metadata,
+        self.alteracoes = Table('alteracoes', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('atendimento_id', Integer, ForeignKey('atendimentos.id'), unique=True, nullable=False),
             Column('tipo', String(50), nullable=False), # 'AGENTE NÃO ATENDIDO', 'ROTA COMPROMETIDA', 'CESTA DANIFICADA'
@@ -113,7 +113,7 @@ class Tabela():
 
 # ------------------------------------------------ TABELAS RELACIONAIS (N:N) -------------------------------------------------
 
-        self.entrega = Table('entregas', self.metadata,
+        self.entregas = Table('entregas', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('agente_id', Integer, ForeignKey('agentes.id'), nullable=False),
             Column('atendimento_id', Integer, ForeignKey('atendimentos.id'), nullable=False),
@@ -124,7 +124,7 @@ class Tabela():
             Column('assinatura_destinatario', String(100), nullable=False)
         )
 
-        self.doacao = Table('doacoes', self.metadata,
+        self.doacoes = Table('doacoes', self.metadata,
             Column('id', Integer, primary_key=True),
             Column('fornecedor_id', Integer, ForeignKey('fornecedores.id'), nullable=False),
             Column('unidade_tratamento_id', Integer, ForeignKey('unidades_tratamento.id'), nullable=False),
